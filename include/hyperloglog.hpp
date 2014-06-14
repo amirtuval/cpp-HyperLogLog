@@ -142,11 +142,13 @@ public:
         return m_;
     }
 
-private:
+protected:
     uint8_t b_; ///< register bit width
     uint32_t m_; ///< register size
-    double alphaMM_; ///< alpha * m^2
     std::vector<uint8_t> M_; ///< registers
+
+private:
+    double alphaMM_; ///< alpha * m^2
 
     uint8_t rho(uint32_t x, uint8_t b) {
         uint8_t v = 1;
