@@ -36,8 +36,8 @@ public:
      *
      * @exception std::invalid_argument the argument is out of range.
      */
-    HyperLogLog(uint8_t b) throw (std::invalid_argument) :
-            b_(b), m_(1 << b), M_(m_, 0) {
+    HyperLogLog(uint8_t b, bool legacyMode=true) throw (std::invalid_argument) :
+            b_(b), m_(1 << b), M_(m_, 0), legacyMode_(legacyMode) {
 
         if (b < 4 || 16 < b) {
             throw std::invalid_argument("bit width must be in the range [4,16]");
@@ -70,8 +70,18 @@ public:
     void add(const char* str, uint32_t len) {
         uint32_t hash;
         MurmurHash3_x86_32(str, len, HLL_HASH_SEED, (void*) &hash);
-        uint32_t index = hash >> (32 - b_);
-        uint8_t rank = rho((hash << b_), 32 - b_);
+        
+        uint32_t index;
+        uint8_t rank;
+
+        if (legacyMode_) {
+            index = hash >> (32 - b_);
+            rank = rho((hash << b_), 32 - b_);
+        } else {
+            rank = rho(hash, 32);
+            index = (hash << rank) >> (32 - b_);
+        }
+
         if (rank > M_[index]) {
             M_[index] = rank;
         }
@@ -149,6 +159,7 @@ protected:
 
 private:
     double alphaMM_; ///< alpha * m^2
+    bool legacyMode_;
 
     uint8_t rho(uint32_t x, uint8_t b) {
         uint8_t v = 1;
