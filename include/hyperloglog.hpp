@@ -129,9 +129,12 @@ public:
             ss << "number of registers doesn't match: " << m_ << " != " << other.m_;
             throw std::invalid_argument(ss.str().c_str());
         }
+
+        unsigned char* myArr = &M_[0];
+        const unsigned char* otherArr = &other.M_[0];
         for (uint32_t r = 0; r < m_; ++r) {
-            if (M_[r] < other.M_[r]) {
-                M_[r] = other.M_[r];
+            if (myArr[r] < otherArr[r]) {
+                myArr[r] = otherArr[r];
             }
         }
     }
